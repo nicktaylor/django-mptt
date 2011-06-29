@@ -305,7 +305,7 @@ class MPTTModel(models.Model):
 
             return self._tree_manager._mptt_filter(parent=self)
 
-    def get_descendants(self, include_self=False):
+    def get_descendants(self, include_self=False, max_level=None):
         """
         Creates a ``QuerySet`` containing descendants of this model
         instance, in tree order.
@@ -326,12 +326,21 @@ class MPTTModel(models.Model):
         if not include_self:
             left += 1
             right -= 1
-        
-        return self._tree_manager._mptt_filter(
-            tree_id=self._mpttfield('tree_id'),
-            left__gte=left,
-            left__lte=right
-        )
+
+        if max_level == None:
+            return self._tree_manager._mptt_filter(
+                tree_id=self._mpttfield('tree_id'),
+                left__gte=left,
+                left__lte=right
+            )
+        else:
+            return self._tree_manager._mptt_filter(
+                tree_id=self._mpttfield('tree_id'),
+                left__gte=left,
+                left__lte=right,
+                level__lte=max_level
+            )
+
 
     def get_descendant_count(self):
         """
