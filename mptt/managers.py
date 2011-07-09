@@ -92,7 +92,7 @@ class TreeManager(models.Manager):
             new_lookups['__'.join(new_parts)] = v
         return new_lookups
     
-    def _mptt_filter(self, qs=None, **filters):
+    def _mptt_filter(self, qs=None, include_related=False, **filters):
         """
         Like self.filter(), but translates name-agnostic filters for MPTT fields.
         """
@@ -101,7 +101,7 @@ class TreeManager(models.Manager):
         
         if qs is None:
             qs = self.get_query_set()
-        return qs.filter(**self._translate_lookups(**filters))
+        return qs.select_related().filter(**self._translate_lookups(**filters)) if include_related else qs.filter(**self._translate_lookups(**filters))
     
     def _mptt_update(self, qs=None, **items):
         """
