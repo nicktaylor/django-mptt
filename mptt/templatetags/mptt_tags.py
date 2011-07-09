@@ -263,11 +263,18 @@ class RecurseTreeNode(template.Node):
         context.pop()
         return rendered
     
-    def render(self, context):
+    def render(self, context, reverse=False):
         queryset = self.queryset_var.resolve(context)
         roots = cache_tree_children(queryset)
+        if reverse:
+            roots.reverse()
         bits = [self._render_node(context, node) for node in roots]
         return ''.join(bits)
+
+
+class RecurseTreeNodeReverse(RecurseTreeNode):
+    def render(self, context):
+        return super(RecurseTreeNodeReverse, self).render(context, reverse=True)
 
 
 @register.tag
@@ -292,12 +299,16 @@ def recursetree(parser, token):
             </ul>
     """
     bits = token.contents.split()
-    if len(bits) != 2:
+    if len(bits) < 2:
         raise template.TemplateSyntaxError(_('%s tag requires a queryset') % bits[0])
     
     queryset_var = template.Variable(bits[1])
+    reverse = False if len(bits) <= 2 else bits[2]
     
     template_nodes = parser.parse(('endrecursetree',))
     parser.delete_first_token()
     
-    return RecurseTreeNode(template_nodes, queryset_var)
+    if reverse: 
+        return RecurseTreeNodeReverse(template_nodes, queryset_var)
+    else: 
+        return RecurseTreeNode(template_nodes, queryset_var)
