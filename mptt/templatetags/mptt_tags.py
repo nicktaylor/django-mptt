@@ -297,6 +297,33 @@ def recursetree(parser, token):
                     </li>
                 {% endrecursetree %}
             </ul>
+
+    The root nodes can be reversed to traverse from bottom to top instead of top to 
+    bottom. All children of the root names will remain in the original order.
+
+    Usage:
+            <ul>
+                {% recursetree nodes True %}
+                    <li>...
+                    ...</li>
+                {% endrecursetree %}
+            </ul>
+
+    Therefore:
+        Node 1
+        Node 2 ---- Node 3
+                 \- Node 4
+
+        Node 5 ---- Node 6
+                 \- Node 7
+
+    Becomes:
+        Node 5 ---- Node 6
+                 \- Node 7
+        Node 2 ---- Node 3
+                 \- Node 4       
+        Node 1
+                  
     """
     bits = token.contents.split()
     if len(bits) < 2:
